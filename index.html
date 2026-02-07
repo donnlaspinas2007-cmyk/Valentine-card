@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Valentine’s Day Card 💖</title>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(to bottom, #ffafbd, #ffc3a0);
+  overflow-x: hidden;
+  color: #5a2a2a;
+}
+
+/* Falling hearts */
+.heart {
+  position: fixed;
+  top: -10px;
+  font-size: 20px;
+  animation: fall linear infinite;
+}
+@keyframes fall {
+  to { transform: translateY(110vh); }
+}
+
+/* Envelope */
+.envelope {
+  width: 320px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.6s;
+}
+.envelope.open {
+  transform: scale(1.05);
+}
+.message {
+  display: none;
+  font-family: 'Great Vibes', cursive;
+  font-size: 32px;
+  margin-top: 20px;
+}
+.envelope.open .message {
+  display: block;
+}
+
+/* Controls */
+.section {
+  background: rgba(255,255,255,0.9);
+  margin: 20px;
+  padding: 20px;
+  border-radius: 15px;
+}
+
+button {
+  background: #e75480;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+/* Gallery */
+.gallery {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.gallery img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 15px;
+  border: 5px solid pink;
+}
+
+/* Borders */
+.border-roses img { border-image: url('https://i.imgur.com/QZ6QZ6C.png') 30 round; }
+.border-lilies img { border: 5px solid #d4af37; }
+
+/* Map */
+#map {
+  height: 300px;
+  border-radius: 15px;
+}
+
+/* Wax seals */
+.seals span {
+  font-size: 30px;
+  cursor: pointer;
+}
+.selected {
+  transform: scale(1.3);
+}
+</style>
+</head>
+
+<body>
+
+<!-- Music -->
+<audio id="music" loop>
+  <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_47c2d5d6aa.mp3" type="audio/mpeg">
+</audio>
+
+<!-- Envelope -->
+<div class="envelope" onclick="openEnvelope()">
+  <h2>💌 Open Me 💌</h2>
+  <input id="userMessage" placeholder="Type your message..." />
+  <div class="message" id="displayMessage"></div>
+</div>
+
+<!-- Music Toggle -->
+<div class="section">
+  <button onclick="toggleMusic()">🎹 Toggle Music</button>
+</div>
+
+<!-- Countdown -->
+<div class="section">
+  <h3>⏳ Countdown to Valentine’s Day</h3>
+  <div id="countdown"></div>
+</div>
+
+<!-- Poem Generator -->
+<div class="section">
+  <button onclick="generatePoem()">📜 Generate Secret Poem</button>
+  <p id="poem"></p>
+</div>
+
+<!-- Gallery -->
+<div class="section">
+  <h3>🖼️ Our Memories</h3>
+  <input type="file" multiple onchange="loadImages(event)">
+  <div>
+    Border:
+    <button onclick="setBorder('roses')">🌹 Roses</button>
+    <button onclick="setBorder('lilies')">🌸 Lilies</button>
+  </div>
+  <div class="gallery" id="gallery"></div>
+</div>
+
+<!-- Wax Seal -->
+<div class="section">
+  <h3>🕯️ Choose a Wax Seal</h3>
+  <div class="seals">
+    <span onclick="selectSeal(this)">❤️</span>
+    <span onclick="selectSeal(this)">🌹</span>
+    <span onclick="selectSeal(this)">💍</span>
+  </div>
+</div>
+
+<!-- Map -->
+<div class="section">
+  <h3>🗺️ Our Favorite Places</h3>
+  <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+// Hearts
+setInterval(() => {
+  const heart = document.createElement('div');
+  heart.className = 'heart';
+  heart.innerText = '❤️';
+  heart.style.left = Math.random() * 100 + 'vw';
+  heart.style.animationDuration = (3 + Math.random()*5) + 's';
+  document.body.appendChild(heart);
+  setTimeout(() => heart.remove(), 8000);
+}, 300);
+
+// Envelope
+function openEnvelope() {
+  document.querySelector('.envelope').classList.toggle('open');
+  document.getElementById('displayMessage').innerText =
+    document.getElementById('userMessage').value;
+}
+
+// Music
+const music = document.getElementById('music');
+function toggleMusic() {
+  music.paused ? music.play() : music.pause();
+}
+
+// Countdown
+function updateCountdown() {
+  const valentine = new Date(new Date().getFullYear(), 1, 14);
+  const now = new Date();
+  const diff = valentine - now;
+  const days = Math.floor(diff / (1000*60*60*24));
+  document.getElementById('countdown').innerText = days + " days left 💕";
+}
+setInterval(updateCountdown, 1000);
+
+// Poem
+const poems = [
+  "Your love is the whisper my heart understands.",
+  "Every moment with you is a verse of forever.",
+  "In your arms, even time falls in love."
+];
+function generatePoem() {
+  document.getElementById('poem').innerText =
+    poems[Math.floor(Math.random()*poems.length)];
+}
+
+// Gallery
+let gallery = document.getElementById('gallery');
+function loadImages(e) {
+  for (let file of e.target.files) {
+    let img = document.createElement('img');
+    img.src = URL.createObjectURL(file);
+    gallery.appendChild(img);
+  }
+}
+function setBorder(type) {
+  gallery.className = 'gallery border-' + type;
+}
+
+// Wax Seal
+function selectSeal(el) {
+  document.querySelectorAll('.seals span').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// Map
+const map = L.map('map').setView([14.5995, 120.9842], 5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+map.on('click', e => L.marker(e.latlng).addTo(map));
+</script>
+
+</body>
+</html>
